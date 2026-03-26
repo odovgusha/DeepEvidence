@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>💬 Threads</h1>
+
+<form action="/chat/create" method="post">
+    <input type="text" name="name" placeholder="Thread name">
+    <button type="submit">Create Thread</button>
+</form>
+
+<ul>
+{% for t in threads %}
+    <li>
+        <a href="/chat/{{ t.id }}">
+            {{ t.name or "Thread " ~ t.id }}
+        </a>
+    </li>
+{% endfor %}
+</ul>
+
+<a href="/">⬅ Back</a>
+
+</body>
+</html>

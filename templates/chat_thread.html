@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Thread {{ thread_id }}</h1>
+
+<div>
+{% for m in messages %}
+    <p><b>{{ m.role }}:</b> {{ m.content }}</p>
+{% endfor %}
+</div>
+
+<hr>
+
+<form method="post">
+    <input type="text" name="message" required>
+    <button type="submit">Send</button>
+</form>
+
+<a href="/chat">⬅ Back</a>
+
+</body>
+</html>
