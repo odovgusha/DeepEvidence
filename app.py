@@ -1,18 +1,17 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 import os
+
+from werkzeug.utils import secure_filename
+
 import data_manager as dm
 from models import db
 from services.pdf import extract_text
-from werkzeug.utils import secure_filename
+
 
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-# ============================
-# DATABASE CONFIG
-# ============================
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -20,9 +19,25 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 dm.init_db(app)
 
 
-# ============================
-# HOME (PAPERS UI)
-# ============================
+# ---------- HOME (PAPERS UI) ----------
+
+@app.route("/debug")
+def debug_view():
+    papers = dm.get_all_papers()
+    threads = dm.get_threads()
+
+    thread_messages = {
+        t.id: dm.get_messages(t.id)
+        for t in threads
+    }
+
+    return render_template(
+        "debug.html",
+        papers=papers,
+        threads=threads,
+        thread_messages=thread_messages,
+    )
+
 
 @app.route("/")
 def home():
@@ -39,6 +54,7 @@ def upload_paper_html():
 
     filename = secure_filename(file.filename)
     filepath = os.path.join(UPLOAD_FOLDER, filename)
+
     file.save(filepath)
 
     text = extract_text(filepath)
@@ -71,9 +87,7 @@ def edit_paper_html(paper_id):
     return render_template("edit_paper.html", paper=p)
 
 
-# ============================
-# CHAT UI
-# ============================
+# ---------- CHAT UI ----------
 
 @app.route("/chat")
 def chat_home():
@@ -94,31 +108,25 @@ def chat_thread(thread_id):
         message = request.form.get("message")
         dm.add_message(thread_id, "user", message)
 
-        # mock assistant reply
-        dm.add_message(thread_id, "assistant", f"Echo: {message}")
-
     messages = dm.get_messages(thread_id)
 
     return render_template(
         "chat_thread.html",
         thread_id=thread_id,
-        messages=messages
+        messages=messages,
     )
 
 
-# ============================
-# API (optional)
-# ============================
+# ---------- API ----------
 
 @app.route("/papers", methods=["GET"])
 def get_papers():
     papers = dm.get_all_papers()
-    return jsonify([{"id": p.id, "filename": p.filename} for p in papers])
+    return jsonify(
+        [{"id": p.id, "filename": p.filename} for p in papers]
+    )
 
 
-# ============================
-# RUN
-# ============================
 
 if __name__ == "__main__":
     app.run(debug=True)

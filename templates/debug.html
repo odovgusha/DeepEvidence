@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>📊 Debug View</h1>
+
+<h2>Papers</h2>
+<table border="1">
+<tr><th>ID</th><th>Filename</th></tr>
+{% for p in papers %}
+<tr><td>{{ p.id }}</td><td>{{ p.filename }}</td></tr>
+{% endfor %}
+</table>
+
+<hr>
+
+<h2>Threads</h2>
+<table border="1">
+<tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>User</th>
+    <th>Created At</th>
+</tr>
+{% for t in threads %}
+<tr>
+    <td>{{ t.id }}</td>
+    <td>{{ t.name }}</td>
+    <td>{{ t.user_id }}</td>
+    <td>{{ t.created_at }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<hr>
+
+<h2>Messages</h2>
+
+{% for t in threads %}
+<h3>Thread {{ t.id }} ({{ t.name }})</h3>
+
+<table border="1">
+<tr>
+    <th>ID</th>
+    <th>Thread ID</th>
+    <th>Role</th>
+    <th>Content</th>
+    <th>Created At</th>
+</tr>
+
+{% for m in thread_messages[t.id] %}
+<tr>
+    <td>{{ m.id }}</td>
+    <td>{{ m.thread_id }}</td>
+    <td>{{ m.role }}</td>
+    <td>{{ m.content }}</td>
+    <td>{{ m.created_at }}</td>
+</tr>
+{% endfor %}
+</table>
+
+{% endfor %}
+
+<a href="/">Back</a>
+
+</body>
+</html>

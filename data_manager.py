@@ -7,10 +7,6 @@ def init_db(app):
         db.create_all()
 
 
-# ============================
-# PAPERS
-# ============================
-
 def create_paper(filename, content):
     paper = Paper(filename=filename, content=content)
     db.session.add(paper)
@@ -38,10 +34,6 @@ def update_paper(paper_id, new_filename):
     db.session.commit()
 
 
-# ============================
-# THREADS
-# ============================
-
 def create_thread(name=None, user_id=None):
     thread = Thread(name=name, user_id=user_id)
     db.session.add(thread)
@@ -50,24 +42,24 @@ def create_thread(name=None, user_id=None):
 
 
 def get_threads():
-    return Thread.query.order_by(Thread.created_at.desc()).all()
+    return Thread.query.order_by(
+        Thread.created_at.desc()
+    ).all()
 
-
-# ============================
-# MESSAGES
-# ============================
 
 def add_message(thread_id, role, content):
     msg = Message(
         thread_id=thread_id,
         role=role,
-        content=content
+        content=content,
     )
     db.session.add(msg)
     db.session.commit()
 
 
 def get_messages(thread_id):
-    return Message.query.filter_by(thread_id=thread_id)\
-        .order_by(Message.created_at.asc())\
+    return (
+        Message.query.filter_by(thread_id=thread_id)
+        .order_by(Message.created_at.asc())
         .all()
+    )

@@ -5,7 +5,8 @@
 <h1>💬 Threads</h1>
 
 <form action="/chat/create" method="post">
-    <input type="text" name="name" placeholder="Thread name">
+    <input type="text" name="name" placeholder="Enter thread name" required>
+    <input type="text" name="user_id" placeholder="User ID (optional)">
     <button type="submit">Create Thread</button>
 </form>
 
@@ -13,7 +14,7 @@
 {% for t in threads %}
     <li>
         <a href="/chat/{{ t.id }}">
-            {{ t.name or "Thread " ~ t.id }}
+            {{ t.name }} ({{ t.user_id or "anonymous" }})
         </a>
     </li>
 {% endfor %}
