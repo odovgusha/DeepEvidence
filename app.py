@@ -3,7 +3,7 @@ from services.vector_store import add_paper_to_index, search_all
 import os
 
 from werkzeug.utils import secure_filename
-
+from services.rag_chain import generate_answer
 import data_manager as dm
 from models import db
 from services.pdf import extract_text
@@ -114,8 +114,36 @@ def create_thread_html():
 @app.route("/chat/<int:thread_id>", methods=["GET", "POST"])
 def chat_thread(thread_id):
     if request.method == "POST":
-        message = request.form.get("message")
-        dm.add_message(thread_id, "user", message)
+        user_input = request.form.get("message")
+
+        # 1️⃣ Save user message
+        dm.add_message(thread_id, "user", user_input)
+
+        # 2️⃣ Get conversation history
+        messages = dm.get_messages(thread_id)
+
+        history = "\n".join([
+            f"{m.role}: {m.content}"
+            for m in messages[-10:]  # last 10 messages
+        ])
+
+        # 3️⃣ Retrieve RAG context
+        results = search_all(user_input)
+
+        rag_data = "\n\n".join([
+            r["content"] if isinstance(r, dict) else str(r)
+            for r in results[:5]  # top 5 chunks
+        ])
+
+        # 4️⃣ Generate AI response
+        ai_response = generate_answer(
+            user_input=user_input,
+            rag_data=rag_data,
+            history=history
+        )
+
+        # 5️⃣ Save AI response
+        dm.add_message(thread_id, "assistant", ai_response)
 
     messages = dm.get_messages(thread_id)
 
