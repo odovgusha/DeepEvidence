@@ -6,10 +6,33 @@
 
 <h2>Papers</h2>
 <table border="1">
-<tr><th>ID</th><th>Filename</th></tr>
-{% for p in papers %}
-<tr><td>{{ p.id }}</td><td>{{ p.filename }}</td></tr>
-{% endfor %}
+  <tr>
+    <th>ID</th>
+    <th>Filename</th>
+    <th>Chunks</th>
+    <th>Chunk Size</th>
+    <th>Overlap</th>
+    <th>Actions</th>
+  </tr>
+
+  {% for p in papers %}
+  <tr>
+    <td>{{ p.id }}</td>
+    <td>{{ p.filename }}</td>
+
+    <!-- ✅ NEW COLUMNS -->
+    <td>{{ p.chunk_count or 0 }}</td>
+    <td>{{ p.chunk_size or "-" }}</td>
+    <td>{{ p.chunk_overlap or "-" }}</td>
+
+    <td>
+      <a href="/papers/view/{{ p.id }}">View</a>
+      <form action="/papers/delete/{{ p.id }}" method="POST" style="display:inline;">
+        <button type="submit">Delete</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
 </table>
 
 <hr>
@@ -62,6 +85,8 @@
 {% endfor %}
 
 <a href="/">Back</a>
+
+
 
 </body>
 </html>

@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for
+from services.vector_store import add_paper_to_index, search_all
 import os
 
 from werkzeug.utils import secure_filename
@@ -6,6 +7,11 @@ from werkzeug.utils import secure_filename
 import data_manager as dm
 from models import db
 from services.pdf import extract_text
+from dotenv import load_dotenv
+import faiss
+import os
+
+load_dotenv()
 
 
 app = Flask(__name__)
@@ -58,7 +64,10 @@ def upload_paper_html():
     file.save(filepath)
 
     text = extract_text(filepath)
-    dm.create_paper(filename, text)
+
+    paper_id = dm.create_paper(filename, text)
+
+    add_paper_to_index(paper_id, filename, text)
 
     return redirect(url_for("home"))
 
@@ -87,7 +96,7 @@ def edit_paper_html(paper_id):
     return render_template("edit_paper.html", paper=p)
 
 
-# ---------- CHAT UI ----------
+
 
 @app.route("/chat")
 def chat_home():
@@ -117,7 +126,21 @@ def chat_thread(thread_id):
     )
 
 
-# ---------- API ----------
+
+@app.route("/search", methods=["GET", "POST"])
+def search_all_papers():
+    if request.method == "POST":
+        query = request.form.get("query")
+        results = search_all(query)
+    else:
+        results = []
+        query = ""
+
+    return render_template(
+        "search_results.html",
+        results=results,
+        query=query,
+    )
 
 @app.route("/papers", methods=["GET"])
 def get_papers():

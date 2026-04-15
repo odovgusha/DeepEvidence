@@ -9,6 +9,9 @@ class Paper(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(255))
     content = db.Column(db.Text)
+    chunk_count = db.Column(db.Integer)
+    chunk_size = db.Column(db.Integer)
+    chunk_overlap = db.Column(db.Integer)
 
 
 class Thread(db.Model):

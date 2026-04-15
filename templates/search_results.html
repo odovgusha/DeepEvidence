@@ -1,0 +1,8 @@
+<h2>Results for "{{ query }}"</h2>
+
+{% for r in results %}
+  <div style="margin-bottom:20px;">
+    <strong>Paper:</strong> {{ r.metadata.filename }} <br>
+    <p>{{ r.page_content }}</p>
+  </div>
+{% endfor %}
