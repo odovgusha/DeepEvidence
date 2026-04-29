@@ -25,7 +25,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 dm.init_db(app)
 
 
-# ---------- HOME (PAPERS UI) ----------
+
 
 @app.route("/debug")
 def debug_view():
@@ -111,38 +111,35 @@ def create_thread_html():
     return redirect(url_for("chat_thread", thread_id=thread_id))
 
 
+
 @app.route("/chat/<int:thread_id>", methods=["GET", "POST"])
 def chat_thread(thread_id):
     if request.method == "POST":
         user_input = request.form.get("message")
 
-        # 1️⃣ Save user message
+        # Save user message
         dm.add_message(thread_id, "user", user_input)
 
-        # 2️⃣ Get conversation history
+        # Get history
         messages = dm.get_messages(thread_id)
-
         history = "\n".join([
             f"{m.role}: {m.content}"
-            for m in messages[-10:]  # last 10 messages
+            for m in messages[-6:]
         ])
 
-        # 3️⃣ Retrieve RAG context
+        # VECTOR SEARCH
         results = search_all(user_input)
 
-        rag_data = "\n\n".join([
-            r["content"] if isinstance(r, dict) else str(r)
-            for r in results[:5]  # top 5 chunks
-        ])
 
-        # 4️⃣ Generate AI response
+
+        # Generate answer
         ai_response = generate_answer(
             user_input=user_input,
-            rag_data=rag_data,
+            results=results,
             history=history
         )
 
-        # 5️⃣ Save AI response
+        # Save assistant response
         dm.add_message(thread_id, "assistant", ai_response)
 
     messages = dm.get_messages(thread_id)
